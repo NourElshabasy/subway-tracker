@@ -1,0 +1,6 @@
+@SubwayTracker.Api_HostAddress = http://localhost:5147
+
+GET {{SubwayTracker.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
