@@ -1,10 +1,26 @@
+using SubwayTracker.Api.Models;
+using SubwayTracker.Api.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+var gtfsPath = builder.Configuration["GtfsPath"];
+if (string.IsNullOrWhiteSpace(gtfsPath))
+{
+    throw new InvalidOperationException(
+        "Required configuration value 'GtfsPath' is missing or empty. Set it in appsettings.json or another configuration source.");
+}
+
 builder.Services.AddOpenApi();
 
+var fullGtfsPath = Path.Combine(builder.Environment.ContentRootPath, gtfsPath);
+var gtfsData = new GtfsLoader().Load(fullGtfsPath);
+builder.Services.AddSingleton(gtfsData);
+
 var app = builder.Build();
+
+app.Logger.LogInformation(
+    "GTFS loaded: {Routes} routes, {Stops} stops, {Trips} trips, {Shapes} shape points",
+    gtfsData.Routes.Count, gtfsData.Stops.Count, gtfsData.Trips.Count, gtfsData.Shapes.Count);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
